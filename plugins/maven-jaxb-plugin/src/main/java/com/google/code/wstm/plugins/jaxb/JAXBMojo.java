@@ -17,9 +17,11 @@ package com.google.code.wstm.plugins.jaxb;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -41,6 +43,8 @@ import com.sun.tools.xjc.outline.Outline;
  * @requiresDependencyResolution compile
  */
 public class JAXBMojo extends AbstractMojo {
+    private static final String EPISODE_FILE = "META-INF/sun-jaxb.episode";
+    
     /**
      * @parameter expression="src/main/bindings"
      * @required
@@ -81,8 +85,31 @@ public class JAXBMojo extends AbstractMojo {
             }
         }
         
+        // Scan the compile classpath for JAXB episode files
         try {
-            options.parseArguments(new String[] { "-episode", generateDirectory.getPath() + "/META-INF/sun-jaxb.episode" });
+            // TODO: probably we need to exclude the current project.build.directory
+            for (String classpathElement : (List<String>)project.getCompileClasspathElements()) {
+                File f = new File(classpathElement);
+                System.out.println("Scanning " + f);
+                if (f.isDirectory()) {
+                    File episodeFile = new File(f, EPISODE_FILE);
+                    if (episodeFile.exists()) {
+                        options.addBindFile(episodeFile);
+                    }
+                } else {
+                    try {
+                        options.scanEpisodeFile(f);
+                    } catch (BadCommandLineException ex) {
+                        throw new MojoExecutionException("Failed to load " + f, ex.getCause());
+                    }
+                }
+            }
+        } catch (DependencyResolutionRequiredException ex) {
+            throw new MojoExecutionException("Failed to get compile classpath", ex);
+        }
+        
+        try {
+            options.parseArguments(new String[] { "-episode", generateDirectory.getPath() + "/" + EPISODE_FILE });
         } catch (BadCommandLineException ex) {
             throw new MojoExecutionException("XJC failed to understand -episode option", ex);
         }
