@@ -29,6 +29,7 @@
     <packaging>pom</packaging>
     
     <modules>
+        <module>xjc</module>
         <module>maven-jaxb-plugin</module>
         <module>maven-xsd-plugin</module>
     </modules>
