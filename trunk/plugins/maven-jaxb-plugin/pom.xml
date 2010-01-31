@@ -37,9 +37,9 @@
             <artifactId>maven-project</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.sun.xml.bind</groupId>
-            <artifactId>jaxb-xjc</artifactId>
-            <version>2.2</version>
+            <groupId>${groupId}</groupId>
+            <artifactId>xjc</artifactId>
+            <version>${version}</version>
         </dependency>
     </dependencies>
 </project>
