@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -27,6 +28,7 @@ import org.apache.maven.project.MavenProject;
 
 import com.sun.codemodel.CodeWriter;
 import com.sun.codemodel.JCodeModel;
+import com.sun.tools.xjc.BadCommandLineException;
 import com.sun.tools.xjc.ErrorReceiver;
 import com.sun.tools.xjc.ModelLoader;
 import com.sun.tools.xjc.Options;
@@ -59,7 +61,7 @@ public class JAXBMojo extends AbstractMojo {
     private MavenProject project;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-        generateDirectory.mkdirs();
+        new File(generateDirectory, "META-INF").mkdirs();
 
         Options options = new Options();
         
@@ -79,6 +81,12 @@ public class JAXBMojo extends AbstractMojo {
             }
         }
         
+        try {
+            options.parseArguments(new String[] { "-episode", generateDirectory.getPath() + "/META-INF/sun-jaxb.episode" });
+        } catch (BadCommandLineException ex) {
+            throw new MojoExecutionException("XJC failed to understand -episode option", ex);
+        }
+        
         ErrorReceiver er = new ErrorReporter();
         Model model = ModelLoader.load(options, new JCodeModel(), er);
         if (model == null) {
@@ -94,6 +102,11 @@ public class JAXBMojo extends AbstractMojo {
         }
         
         project.addCompileSourceRoot(generateDirectory.getPath());
+        
+        Resource generatedResource = new Resource();
+        generatedResource.setDirectory(generateDirectory.getPath());
+        generatedResource.addExclude("**/*.java");
+        project.addResource(generatedResource);
     }
 
 }
