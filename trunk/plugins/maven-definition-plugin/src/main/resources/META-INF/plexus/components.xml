@@ -35,7 +35,7 @@
                     <lifecycle>
                         <id>default</id>
                         <phases>
-                            <package>com.google.code.wstm:maven-xsd-plugin:package</package>
+                            <package>com.google.code.wstm:maven-definition-plugin:package</package>
                             <install>org.apache.maven.plugins:maven-install-plugin:install</install>
                             <deploy>org.apache.maven.plugins:maven-deploy-plugin:deploy</deploy>
                         </phases>

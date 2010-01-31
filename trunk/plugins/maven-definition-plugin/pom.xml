@@ -24,8 +24,8 @@
         <version>0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>maven-xsd-plugin</artifactId>
-    <name>WSTM :: Plugins :: XSD</name>
+    <artifactId>maven-definition-plugin</artifactId>
+    <name>WSTM :: Plugins :: Definition</name>
     <packaging>maven-plugin</packaging>
     <dependencies>
         <dependency>
