@@ -30,6 +30,13 @@ import org.apache.maven.project.MavenProject;
  */
 public class XSDMojo extends AbstractMojo {
     /**
+     * @parameter expression="${project.basedir}"
+     * @required
+     * @readonly
+     */
+    private File baseDir;
+
+    /**
      * @parameter expression="${project.artifactId}.xsd"
      * @required
      */
@@ -43,6 +50,6 @@ public class XSDMojo extends AbstractMojo {
     private MavenProject project;
     
     public void execute() throws MojoExecutionException, MojoFailureException {
-        project.getArtifact().setFile(new File(xsdFile));
+        project.getArtifact().setFile(new File(baseDir, xsdFile));
     }
 }
