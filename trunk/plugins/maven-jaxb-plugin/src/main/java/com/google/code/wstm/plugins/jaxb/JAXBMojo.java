@@ -16,6 +16,8 @@
 package com.google.code.wstm.plugins.jaxb;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Set;
 
@@ -24,6 +26,7 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
+import org.xml.sax.InputSource;
 
 import com.sun.codemodel.CodeWriter;
 import com.sun.codemodel.JCodeModel;
@@ -63,11 +66,26 @@ public class JAXBMojo extends AbstractMojo {
         generateDirectory.mkdirs();
 
         Options options = new Options();
+        
+        // We need to disable strict checking because it would call our custom entity
+        // resolver with relative URIs. Since the base URI is not provided, we cannot
+        // resolve the entity.
+        options.strictCheck = false;
+        
+        options.entityResolver = new MavenEntityResolver();
         options.targetDir = generateDirectory;
         
         for (Artifact artifact : (Set<Artifact>)project.getDependencyArtifacts()) {
             if ("xsd".equals(artifact.getType())) {
-                options.addGrammar(artifact.getFile());
+                InputSource is = new InputSource();
+                try {
+                    is.setByteStream(new FileInputStream(artifact.getFile()));
+                } catch (FileNotFoundException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                is.setSystemId("maven:some.group.id:employee");
+                options.addGrammar(is);
             }
         }
         

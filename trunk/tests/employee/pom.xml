@@ -22,6 +22,14 @@
     <artifactId>employee</artifactId>
     <version>1</version>
     <packaging>xsd</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>com.google.code.wstm.tests</groupId>
+            <artifactId>common</artifactId>
+            <version>1</version>
+            <type>xsd</type>
+        </dependency>
+    </dependencies>
     <build>
         <plugins>
             <plugin>
