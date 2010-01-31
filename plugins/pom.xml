@@ -30,8 +30,8 @@
     
     <modules>
         <module>xjc</module>
+        <module>maven-definition-plugin</module>
         <module>maven-jaxb-plugin</module>
-        <module>maven-xsd-plugin</module>
     </modules>
     
     <properties>
