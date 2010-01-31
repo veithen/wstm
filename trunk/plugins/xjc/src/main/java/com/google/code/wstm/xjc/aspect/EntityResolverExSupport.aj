@@ -25,6 +25,7 @@ import org.xml.sax.SAXParseException;
 import com.google.code.wstm.xjc.EntityResolverEx;
 import com.sun.xml.xsom.impl.parser.NGCCRuntimeEx;
 
+// TODO: probably this will no longer be necessary
 public aspect EntityResolverExSupport {
     InputSource around(NGCCRuntimeEx rt, String namespaceURI, String relativeURI) throws SAXException:
             execution(InputSource NGCCRuntimeEx.resolveRelativeURL(String, String)) && this(rt) && args(namespaceURI, relativeURI) {
