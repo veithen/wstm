@@ -74,6 +74,9 @@ public class JAXBMojo extends AbstractMojo {
         // resolve the entity.
         options.strictCheck = false;
         
+        // Required for SCD support (needed by episode files)
+        options.compatibilityMode = Options.EXTENSION;
+        
         MavenEntityResolver resolver = new MavenEntityResolver(project);
         
         options.entityResolver = resolver;

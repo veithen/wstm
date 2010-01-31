@@ -22,14 +22,15 @@ import java.net.URL;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.google.code.wstm.xjc.EntityResolverEx;
 
-public class MavenEntityResolver implements EntityResolverEx {
+public class MavenEntityResolver implements EntityResolver {
     private static final String URI_SCHEME = "maven";
-    private static final String URI_PREFIX = URI_SCHEME + ":";
+    private static final String URI_PREFIX = URI_SCHEME + ":/";
     
     private final MavenProject project;
     
@@ -39,7 +40,7 @@ public class MavenEntityResolver implements EntityResolverEx {
 
     public InputSource getInputSource(Artifact artifact) {
         InputSource is = new InputSource();
-        is.setSystemId(URI_PREFIX + artifact.getGroupId() + ":" + artifact.getArtifactId() + ":" + artifact.getType());
+        is.setSystemId(URI_PREFIX + artifact.getGroupId().replace('.', '/') + "/" + artifact.getArtifactId() + "." + artifact.getType());
         try {
             is.setByteStream(new FileInputStream(artifact.getFile()));
         } catch (FileNotFoundException ex) {
@@ -49,43 +50,19 @@ public class MavenEntityResolver implements EntityResolverEx {
     }
     
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-        return new InputSource(systemId);
-    }
-
-    public InputSource resolveRelativeURL(String namespaceURI, String baseURI, String relativeURI) throws SAXException, IOException {
-        if (isAbsoluteURI(relativeURI)) {
-            return resolveEntity(namespaceURI, relativeURI);
-        } else if (baseURI.startsWith(URI_PREFIX)) {
-            int idx = baseURI.indexOf(':', URI_PREFIX.length());
-            if (idx == -1) {
-                throw new SAXException("Invalid URI: " + baseURI);
-            }
-            String groupId = baseURI.substring(URI_PREFIX.length(), idx);
-            // TODO: need to take '..' into account
-            idx = relativeURI.lastIndexOf('.');
-            String artifactId = relativeURI.substring(0, idx);
-            String type = relativeURI.substring(idx+1);
+        System.out.println("Resolving " + systemId);
+        if (systemId.startsWith(URI_PREFIX)) {
+            int lastSlash = systemId.lastIndexOf('/');
+            String groupId = systemId.substring(URI_PREFIX.length(), lastSlash).replace('/', '.');
+            int dot = systemId.lastIndexOf('.');
+            String artifactId = systemId.substring(lastSlash+1, dot);
+            String type = systemId.substring(dot+1);
             Artifact artifact = (Artifact)project.getArtifactMap().get(groupId + ":" + artifactId);
             // TODO: check for null
             // TODO: check artifact type
             return getInputSource(artifact);
         } else {
-            return new InputSource(new URL(new URL(baseURI), relativeURI).toExternalForm());
-        }
-    }
-
-    private static boolean isAbsoluteURI(String uri) {
-        int idx = uri.indexOf(':');
-        if (idx == -1) {
-            return false;
-        } else {
-            for (int i=0; i<idx; i++) {
-                char c = uri.charAt(i);
-                if (c == '/' || c == '?' || c == '#') {
-                    return false;
-                }
-            }
-            return true;
+            return new InputSource(systemId);
         }
     }
 }
