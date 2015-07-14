@@ -1,0 +1,1 @@
+The aim of this project is to provide a set of Maven plugins that simplify development of modular projects that need to generate JAX-WS based Web service artifacts. The provided plugins can be used as replacements of maven-jaxb2-plugin and jaxws-maven-plugin.
